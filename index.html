@@ -16,11 +16,18 @@
     <script src="js/xiaoiceRTC1.0.6.js" type="text/javascript"></script>
     <script src="js/xiaoiceASR1.0.5.js" type="text/javascript"></script>
     <script>
-        function initRTC() {
+        async function loadConfig() {
+            // 从环境文件中加载密钥和项目 ID
+            const response = await fetch('/config');
+            return await response.json();
+        }
+
+        async function initRTC() {
+            const config = await loadConfig();
             const rtcClient = new window.RTCInteraction({
-                signature: "your_signature_here",
-                projectId: "your_project_id_here",
-                exclusiveVirtualHumanId: "your_virtual_human_id_here",
+                signature: config.signature,
+                projectId: config.projectId,
+                exclusiveVirtualHumanId: config.virtualHumanId,
                 onError: function(errorMes) {
                     console.error("RTC Error:", errorMes);
                 },
