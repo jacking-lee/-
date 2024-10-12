@@ -3,48 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XiaoIce Interaction Demo</title>
-    <link rel="stylesheet" href="/public/css/styles.css">
+    <title>Digital Human Call UI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+        }
+        .card {
+            max-width: 500px;
+            margin: 30px auto;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-top: 20px;
+        }
+        .btn-call, .btn-hangup, .btn-interrupt {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 10px;
+        }
+        .btn-interrupt {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+        }
+        .listening {
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-    <div id="rtc-container">
-        <h1>Welcome to XiaoIce Interaction Demo</h1>
-        <button onclick="initRTC()">Start RTC</button>
+    <div class="card text-center">
+        <div class="card-body">
+            <img src="avatar.png" alt="mily" class="avatar">
+            <h3 class="card-title mt-3">mily</h3>
+            <p class="text-muted">心理咨询顾问</p>
+            <button id="callBtn" class="btn btn-primary btn-call">
+                <img src="call-icon.png" alt="Call" width="32">
+            </button>
+            <button id="hangupBtn" class="btn btn-danger btn-hangup" style="display: none;">
+                <img src="hangup-icon.png" alt="Hangup" width="32">
+            </button>
+            <button id="interruptBtn" class="btn btn-warning btn-interrupt">
+                <img src="interrupt-icon.png" alt="Interrupt" width="32">
+            </button>
+            <p id="statusText" class="listening mt-3">空空如也</p>
+        </div>
     </div>
 
-    <!-- 引入 XiaoIce RTC 和 ASR SDK -->
-    <script src="/public/js/xiaoiceRTC1.0.6.js" type="text/javascript"></script>
-    <script src="/public/js/xiaoiceASR1.0.5.js" type="text/javascript"></script>
     <script>
-        async function loadConfig() {
-            // 从服务器端获取密钥和项目 ID
-            const response = await fetch('/config');
-            return await response.json();
-        }
+        const callBtn = document.getElementById('callBtn');
+        const hangupBtn = document.getElementById('hangupBtn');
+        const interruptBtn = document.getElementById('interruptBtn');
+        const statusText = document.getElementById('statusText');
 
-        async function initRTC() {
-            const config = await loadConfig();
-            const rtcClient = new window.RTCInteraction({
-                signature: config.signature,
-                projectId: config.projectId,
-                exclusiveVirtualHumanId: config.virtualHumanId,
-                onError: function(errorMes) {
-                    console.error("RTC Error:", errorMes);
-                },
-                onInited: function(res) {
-                    console.log("RTC Initialized:", res);
-                    rtcClient.startRTC();
-                },
-                onPlayStream: function(v3Orv4) {
-                    console.log("RTC Play Stream:", v3Orv4);
-                },
-                onStopStream: function() {
-                    console.log("RTC Stream Stopped");
-                }
-            });
+        let callActive = false;
+        let userSpeaking = false;
 
-            rtcClient.init();
-        }
+        callBtn.addEventListener('click', () => {
+            callBtn.style.display = 'none';
+            hangupBtn.style.display = 'inline-block';
+            statusText.textContent = '通话中...';
+            callActive = true;
+            // Mock listener to simulate user speaking
+            setTimeout(() => {
+                statusText.textContent = '用户正在说话...';
+                userSpeaking = true;
+                interruptBtn.style.display = 'block';
+            }, 2000);
+        });
+
+        hangupBtn.addEventListener('click', () => {
+            callBtn.style.display = 'inline-block';
+            hangupBtn.style.display = 'none';
+            interruptBtn.style.display = 'none';
+            statusText.textContent = '通话已结束';
+            callActive = false;
+            userSpeaking = false;
+        });
+
+        interruptBtn.addEventListener('click', () => {
+            if (userSpeaking) {
+                statusText.textContent = '数字人正在说话...';
+                userSpeaking = false;
+                interruptBtn.style.display = 'none';
+                // Mock digital human response
+                setTimeout(() => {
+                    statusText.textContent = '对话等待中...';
+                }, 3000);
+            }
+        });
     </script>
 </body>
 </html>
